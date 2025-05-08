@@ -1,6 +1,8 @@
-import MainLayout from "./layouts/MainLayout"
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import MainLayout from "./layouts/MainLayout"
 import Dashboard from "./pages/dashboard";
+import Login from "./pages/login";
+import Register from "./pages/register";
 
 function App() {
   return (
@@ -20,6 +22,18 @@ function App() {
           <MainLayout>
             <Dashboard   />
           </MainLayout>
+        }
+      />
+       <Route
+        path="/login"
+        element={
+          <Login />
+        }
+      />
+             <Route
+        path="/register"
+        element={
+          <Register />
         }
       />
     </Routes>
