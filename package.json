@@ -15,6 +15,7 @@
     "dompet-juara-fe": "file:",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-responsive": "^10.0.1",
     "react-router-dom": "^7.5.3",
     "tailwindcss": "^4.1.5"
   },
