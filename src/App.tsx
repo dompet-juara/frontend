@@ -7,6 +7,14 @@ function App() {
     <Router>
     <Routes>
       <Route
+        path="/"
+        element={
+          <MainLayout>
+            <Dashboard   />
+          </MainLayout>
+        }
+      />
+       <Route
         path="/dashboard"
         element={
           <MainLayout>
