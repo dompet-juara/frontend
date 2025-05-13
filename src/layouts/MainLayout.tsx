@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMediaQuery } from "react-responsive";
 
 import MobileBottomNav from "../components/MobileBottomNav";
@@ -12,27 +13,24 @@ type MainLayoutProps = {
 };
 
 function MainLayout({ children }: MainLayoutProps) {
-  const isMobile = useMediaQuery({ maxWidth: 767 });
+  const isMobile = useMediaQuery({ maxWidth: 1023 });
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => setSidebarOpen(prev => !prev);
 
   return isMobile ? (
     <>
-      <MobileTopNav />
-      <MobileSideBar />
+      <MobileTopNav toggleSidebar={toggleSidebar} />
+      {isSidebarOpen && <MobileSideBar closeSidebar={() => setSidebarOpen(false)} />}
       <div className="pt-[3.5rem] pb-[3.5rem]">{children}</div>
       <MobileBottomNav />
     </>
   ) : (
     <div className="flex h-screen">
-      {/* Sidebar 20% */}
       <DesktopSideBar />
-
-      {/* Main Area 80% */}
       <div className="flex flex-col w-[80%]">
         <DesktopTopBar />
-
-        {/* Content */}
         <main className="flex-1 p-4 overflow-y-auto">{children}</main>
-
         <DesktopBottomBar />
       </div>
     </div>
