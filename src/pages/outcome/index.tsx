@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 
 function Outcome() {
   const [showModal, setShowModal] = useState(false);
@@ -57,12 +58,23 @@ function Outcome() {
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Pengeluaran</h1>
-      <button
+      <motion.button
         className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
         onClick={() => setShowModal(true)}
+        whileHover={{
+          scale: 1.05,
+        }}
+        whileTap={{
+          scale: 0.95,
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 300,
+          damping: 25,
+        }}
       >
         Tambah Pengeluaran
-      </button>
+      </motion.button>
 
       {showModal && (
         <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
@@ -126,12 +138,23 @@ function Outcome() {
                 >
                   Batal
                 </button>
-                <button
+                <motion.button
                   type="submit"
                   className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                  whileHover={{
+                    scale: 1.05,
+                  }}
+                  whileTap={{
+                    scale: 0.95,
+                  }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 300,
+                    damping: 25,
+                  }}
                 >
                   Simpan
-                </button>
+                </motion.button>
               </div>
             </form>
           </div>
@@ -142,7 +165,21 @@ function Outcome() {
         <h2 className="text-lg font-semibold mb-4">Daftar Pengeluaran</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {dummyData.map((item, index) => (
-            <div key={index} className="bg-white shadow-md rounded p-4 border border-gray-200">
+            <motion.div
+              key={index}
+              className="bg-white shadow-md rounded p-4 border border-gray-200"
+              whileHover={{
+                scale: 1.05,
+              }}
+              whileTap={{
+                scale: 0.98,
+              }}
+              transition={{
+                type: 'spring',
+                stiffness: 250,
+                damping: 25,
+              }}
+            >
               <h3 className="font-bold text-lg">{item.nama}</h3>
               <p className="text-sm text-gray-600 mb-1">
                 <span className="font-semibold">Kategori:</span> {item.kategori}
@@ -153,7 +190,7 @@ function Outcome() {
               <p className="text-sm text-gray-600">
                 <span className="font-semibold">Tanggal:</span> {item.tanggal}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

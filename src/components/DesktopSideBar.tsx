@@ -22,7 +22,7 @@ function DesktopSideBar() {
       <div className="flex flex-col space-y-6 text-white font-bold flex-grow">
         <Link
           to="/dashboard"
-          className="flex items-center hover:bg-[oklch(0.38_0.0761_194.77)] p-6 rounded text-lg"
+          className="flex items-center hover:bg-[oklch(0.38_0.0761_194.77)] active:bg-[oklch(0.38_0.0761_194.77)] active:scale-95 transition-all duration-200 p-6 rounded text-lg"
         >
           <img src={dashboardIcon} alt="Dashboard" className="w-8 h-8 mr-6" />
           Dashboard
@@ -30,7 +30,7 @@ function DesktopSideBar() {
 
         <Link
           to="/income"
-          className="flex items-center hover:bg-[oklch(0.38_0.0761_194.77)] p-6 rounded text-lg"
+          className="flex items-center hover:bg-[oklch(0.38_0.0761_194.77)] active:bg-[oklch(0.38_0.0761_194.77)] active:scale-95 transition-all duration-200 p-6 rounded text-lg"
         >
           <img src={incomeIcon} alt="Income" className="w-8 h-8 mr-6" />
           Income
@@ -38,7 +38,7 @@ function DesktopSideBar() {
 
         <Link
           to="/outcome"
-          className="flex items-center hover:bg-[oklch(0.38_0.0761_194.77)] p-6 rounded text-lg"
+          className="flex items-center hover:bg-[oklch(0.38_0.0761_194.77)] active:bg-[oklch(0.38_0.0761_194.77)] active:scale-95 transition-all duration-200 p-6 rounded text-lg"
         >
           <img src={outcomeIcon} alt="Outcome" className="w-8 h-8 mr-6" />
           Outcome
@@ -46,7 +46,7 @@ function DesktopSideBar() {
 
         <Link
           to="/aireccomender"
-          className="flex items-center hover:bg-[oklch(0.38_0.0761_194.77)] p-6 rounded text-lg"
+          className="flex items-center hover:bg-[oklch(0.38_0.0761_194.77)] active:bg-[oklch(0.38_0.0761_194.77)] active:scale-95 transition-all duration-200 p-6 rounded text-lg"
         >
           <img
             src={aiRecommenderIcon}
@@ -59,7 +59,7 @@ function DesktopSideBar() {
 
       <Link
         to="/logout"
-        className="flex items-center bg-[oklch(0.42_0.0761_194.77)] hover:bg-[oklch(0.38_0.0761_194.77)] p-6 rounded text-red-100 font-bold text-lg"
+        className="flex items-center bg-[oklch(0.42_0.0761_194.77)] hover:bg-[oklch(0.38_0.0761_194.77)] active:bg-[oklch(0.38_0.0761_194.77)] active:scale-95 transition-all duration-200 p-6 rounded text-red-100 font-bold text-lg"
       >
         <img src={logoutIcon} alt="Logout" className="w-8 h-8 mr-6" />
         Logout

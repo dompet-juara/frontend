@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 
 function Income() {
   const [showModal, setShowModal] = useState(false);
@@ -50,12 +51,23 @@ function Income() {
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Pemasukan</h1>
-      <button
-        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+      <motion.button
+        className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-200 ease-in-out shadow-md"
         onClick={() => setShowModal(true)}
+        whileHover={{
+          scale: 1.05,
+        }}
+        whileTap={{
+          scale: 0.95,
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 300,
+          damping: 25,
+        }}
       >
         Tambah Pemasukan
-      </button>
+      </motion.button>
 
       {showModal && (
         <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
@@ -119,12 +131,23 @@ function Income() {
                 >
                   Batal
                 </button>
-                <button
+                <motion.button
                   type="submit"
                   className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                  whileHover={{
+                    scale: 1.05,
+                  }}
+                  whileTap={{
+                    scale: 0.95,
+                  }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 300,
+                    damping: 25,
+                  }}
                 >
                   Simpan
-                </button>
+                </motion.button>
               </div>
             </form>
           </div>
@@ -135,7 +158,21 @@ function Income() {
         <h2 className="text-lg font-semibold mb-4">Daftar Pemasukan</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {dummyIncome.map((item, index) => (
-            <div key={index} className="bg-white shadow-md rounded p-4 border border-gray-200">
+            <motion.div
+              key={index}
+              className="bg-white shadow-lg rounded-lg p-4 border border-gray-200 hover:shadow-xl transition duration-200 ease-in-out"
+              whileHover={{
+                scale: 1.05,
+              }}
+              whileTap={{
+                scale: 0.98,
+              }}
+              transition={{
+                type: 'spring',
+                stiffness: 250,
+                damping: 25,
+              }}
+            >
               <h3 className="font-bold text-lg">{item.nama}</h3>
               <p className="text-sm text-gray-600 mb-1">
                 <span className="font-semibold">Kategori:</span> {item.kategori}
@@ -146,7 +183,7 @@ function Income() {
               <p className="text-sm text-gray-600">
                 <span className="font-semibold">Tanggal:</span> {item.tanggal}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

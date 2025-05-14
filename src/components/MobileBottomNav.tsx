@@ -9,7 +9,7 @@ function MobileBottomNav() {
     <section className="fixed bottom-0 left-0 w-full bg-primary flex justify-between xl:hidden h-[10vh] z-50">
       <Link
         to="/dashboard"
-        className="flex-1 flex flex-col items-center justify-center text-sm text-white hover:bg-[oklch(0.38_0.0761_194.77)]"
+        className="flex-1 flex flex-col items-center justify-center text-sm text-white hover:bg-[oklch(0.38_0.0761_194.77)] active:bg-[oklch(0.38_0.0761_194.77)] active:scale-95 transition-all duration-200"
       >
         <img src={dashboardIcon} alt="Dashboard" className="w-6 h-6 mb-1" />
         Dashboard
@@ -17,7 +17,7 @@ function MobileBottomNav() {
 
       <Link
         to="/income"
-        className="flex-1 flex flex-col items-center justify-center text-sm text-white hover:bg-[oklch(0.38_0.0761_194.77)]"
+        className="flex-1 flex flex-col items-center justify-center text-sm text-white hover:bg-[oklch(0.38_0.0761_194.77)] active:bg-[oklch(0.38_0.0761_194.77)] active:scale-95 transition-all duration-200"
       >
         <img src={incomeIcon} alt="Income" className="w-6 h-6 mb-1" />
         Income
@@ -25,7 +25,7 @@ function MobileBottomNav() {
 
       <Link
         to="/outcome"
-        className="flex-1 flex flex-col items-center justify-center text-sm text-white hover:bg-[oklch(0.38_0.0761_194.77)]"
+        className="flex-1 flex flex-col items-center justify-center text-sm text-white hover:bg-[oklch(0.38_0.0761_194.77)] active:bg-[oklch(0.38_0.0761_194.77)] active:scale-95 transition-all duration-200"
       >
         <img src={outcomeIcon} alt="Outcome" className="w-6 h-6 mb-1" />
         Outcome
@@ -33,7 +33,7 @@ function MobileBottomNav() {
 
       <Link
         to="/aireccomender"
-        className="flex-1 flex flex-col items-center justify-center text-sm text-white hover:bg-[oklch(0.38_0.0761_194.77)]"
+        className="flex-1 flex flex-col items-center justify-center text-sm text-white hover:bg-[oklch(0.38_0.0761_194.77)] active:bg-[oklch(0.38_0.0761_194.77)] active:scale-95 transition-all duration-200"
       >
         <img src={aiRecommendationIcon} alt="AI" className="w-6 h-6 mb-1" />
         AI
