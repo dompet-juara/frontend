@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { useAuthPresenter } from "../../presenters/authPresenter";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const { handleLogin, error, loading } = useAuthPresenter();
+  const { handleLogin, error, loading, setError } = useAuthPresenter();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     await handleLogin({ identifier, password });
   };
 
@@ -15,7 +19,7 @@ const Login = () => {
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
       <div className="bg-white p-6 rounded shadow-md w-96">
         <h2 className="text-2xl font-semibold text-center">Login</h2>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div>
             <input
@@ -40,13 +44,19 @@ const Login = () => {
           <div>
             <button
               type="submit"
-              className="w-full py-3 bg-blue-500 text-white rounded"
+              className="w-full py-3 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
               disabled={loading}
             >
               {loading ? "Loading..." : "Login"}
             </button>
           </div>
         </form>
+        <p className="text-center mt-4 text-sm">
+            Need an account?{' '}
+            <button onClick={() => navigate('/register')} className="text-blue-500 hover:underline">
+              Register here
+            </button>
+        </p>
       </div>
     </div>
   );

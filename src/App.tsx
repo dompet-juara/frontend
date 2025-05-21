@@ -1,62 +1,86 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
-import Dashboard from "./pages/dashboard";
-import Login from "./pages/login";
-import Income from "./pages/income";
-import Register from "./pages/register";
-import Outcome from "./pages/outcome";
-import AIRecommender from "./pages/ai";
+import DashboardView from "./pages/dashboard/DashboardView";
+import LoginView from "./pages/login";
+import IncomeView from "./pages/income/IncomeView";
+import RegisterView from "./pages/register";
+import OutcomeView from "./pages/outcome/OutcomeView";
+import AIRecommenderView from "./pages/ai/AIRecommenderView";
+import { useAuth } from "./contexts/AuthContext";
+import React from "react";
+
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div>Loading authentication state...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        // unprotected
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        // protected
-        <Route
-          path="/"
-          element={
+    <Routes>
+      <Route path="/login" element={<LoginView />} />
+      <Route path="/register" element={<RegisterView />} />
+
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
             <MainLayout>
-              <Dashboard />
+              <DashboardView />
             </MainLayout>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
             <MainLayout>
-              <Dashboard />
+              <DashboardView />
             </MainLayout>
-          }
-        />
-        <Route
-          path="/income"
-          element={
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/income"
+        element={
+          <ProtectedRoute>
             <MainLayout>
-              <Income />
+              <IncomeView />
             </MainLayout>
-          }
-        />
-        <Route
-          path="/outcome"
-          element={
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/outcome"
+        element={
+          <ProtectedRoute>
             <MainLayout>
-              <Outcome />
+              <OutcomeView />
             </MainLayout>
-          }
-        />
-        <Route
-          path="/aireccomender"
-          element={
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/aireccomender"
+        element={
+          <ProtectedRoute>
             <MainLayout>
-              <AIRecommender />
+              <AIRecommenderView />
             </MainLayout>
-          }
-        />
-      </Routes>
-    </Router>
+          </ProtectedRoute>
+        }
+      />
+       <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
   );
 }
 
