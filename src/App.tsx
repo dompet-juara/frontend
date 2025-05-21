@@ -1,10 +1,10 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
-import DashboardView from "./pages/dashboard/DashboardView";
+import DashboardView from "./pages/dashboard/dashboardView";
 import LoginView from "./pages/login";
-import IncomeView from "./pages/income/IncomeView";
+import IncomeView from "./pages/income/incomeView";
 import RegisterView from "./pages/register";
-import OutcomeView from "./pages/outcome/OutcomeView";
+import OutcomeView from "./pages/outcome/outcomeView";
 import AIRecommenderView from "./pages/ai/AIRecommenderView";
 import { useAuth } from "./contexts/AuthContext";
 import React from "react";
