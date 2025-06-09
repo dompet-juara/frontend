@@ -16,6 +16,19 @@ import { useAuth } from '../contexts/AuthContext';
 
 const DEFAULT_LIMIT = 10;
 
+const DUMMY_INCOME_CATEGORIES: IncomeCategory[] = [
+    { id: 701, nama: "Salary (Demo)" },
+    { id: 702, nama: "Freelance (Demo)" },
+    { id: 703, nama: "Investments (Demo)" },
+    { id: 704, nama: "Bonus (Demo)"},
+];
+const DUMMY_INCOMES: Income[] = [
+    { id: 201, jumlah: 9000000, kategori_id: 701, keterangan: 'Monthly Salary (June Demo)', tanggal: new Date(2023, 5, 1).toISOString(), kategori_pemasukan: DUMMY_INCOME_CATEGORIES[0], user_id: 0 },
+    { id: 202, jumlah: 2500000, kategori_id: 702, keterangan: 'Web Design Project (Demo)', tanggal: new Date(2023, 5, 10).toISOString(), kategori_pemasukan: DUMMY_INCOME_CATEGORIES[1], user_id: 0 },
+    { id: 203, jumlah: 350000, kategori_id: 703, keterangan: 'Stock Dividends (Demo)', tanggal: new Date(2023, 5, 15).toISOString(), kategori_pemasukan: DUMMY_INCOME_CATEGORIES[2], user_id: 0 },
+    { id: 204, jumlah: 1200000, kategori_id: 701, keterangan: 'Performance Bonus (Demo)', tanggal: new Date(2023, 5, 20).toISOString(), kategori_pemasukan: DUMMY_INCOME_CATEGORIES[0], user_id: 0 },
+];
+
 export const useIncome = () => {
     const { isGuest } = useAuth();
     const [incomes, setIncomes] = useState<Income[]>([]);
@@ -25,40 +38,59 @@ export const useIncome = () => {
     const [error, setError] = useState<string | null>(null);
 
     const [currentParams, setCurrentParams] = useState<FetchParams>(() => {
-        const today = new Date().toISOString().split('T')[0];
-        return { startDate: today, endDate: today, page: 1, limit: DEFAULT_LIMIT };
+        const today = new Date();
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+        return { startDate: firstDayOfMonth, endDate: lastDayOfMonth, page: 1, limit: DEFAULT_LIMIT };
     });
 
-    const loadIncomes = useCallback(async (params: FetchParams) => {
+    const loadIncomesData = useCallback(async (params: FetchParams) => {
         setLoading(true);
         setError(null);
-
         try {
-            const response: PaginatedIncomeResponse = await fetchIncomes(params);
-            setIncomes(response.data);
-            setPagination(response.pagination);
+            if (isGuest) {
+                await new Promise(resolve => setTimeout(resolve, 300));
+                setIncomes(DUMMY_INCOMES);
+            } else {
+                const response: PaginatedIncomeResponse = await fetchIncomes(params);
+                setIncomes(response.data);
+                setPagination(response.pagination);
+            }
         } catch (err: any) {
-            setError(err.response?.data?.message || err.message || 'Failed to fetch incomes');
-            setIncomes([]);
-            setPagination(null);
+            if (!isGuest) {
+                setError(err.response?.data?.message || err.message || 'Failed to fetch incomes');
+                setIncomes([]);
+                setPagination(null);
+            } else {
+                setIncomes(DUMMY_INCOMES);
+            }
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [isGuest]);
 
-    const loadCategories = useCallback(async () => {
+    const loadCategoriesData = useCallback(async () => {
         try {
-            const data = await fetchIncomeCategories();
-            setCategories(data);
+            if (isGuest) {
+                setCategories(DUMMY_INCOME_CATEGORIES);
+            } else {
+                const data = await fetchIncomeCategories();
+                setCategories(data);
+            }
         } catch (err: any) {
-            setError(err.response?.data?.message || err.message || 'Failed to fetch income categories');
+            if (!isGuest) {
+                setError(err.response?.data?.message || err.message || 'Failed to fetch income categories');
+            } else {
+                setCategories(DUMMY_INCOME_CATEGORIES);
+            }
         }
-    }, []);
+    }, [isGuest]);
 
     useEffect(() => {
-        loadIncomes(currentParams);
-        loadCategories();
-    }, [loadIncomes, loadCategories, currentParams]);
+        loadIncomesData(currentParams);
+        loadCategoriesData();
+    }, [loadIncomesData, loadCategoriesData, currentParams]);
+
 
     const handleAddIncome = async (payload: NewIncomePayload) => {
         if (isGuest) {
@@ -89,7 +121,7 @@ export const useIncome = () => {
         setError(null);
         try {
             await updateIncome(id, payload);
-            await loadIncomes(currentParams);
+            await loadIncomesData(currentParams);
             return true;
         } catch (err: any) {
             setError(err.response?.data?.message || err.message || 'Failed to update income');

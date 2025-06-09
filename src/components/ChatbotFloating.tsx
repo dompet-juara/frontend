@@ -13,7 +13,11 @@ const CloseIcon = () => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
     </svg>
 );
-
+const SendIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+        <path d="M3.105 3.105a1.5 1.5 0 012.122-.001l12.12 12.12a1.5 1.5 0 01-2.122 2.122L3.105 5.227a1.5 1.5 0 01-.001-2.122zM3.105 16.895a1.5 1.5 0 01.001-2.122l12.12-12.12a1.5 1.5 0 012.122 2.122L5.227 16.895a1.5 1.5 0 01-2.122.001z" />
+    </svg>
+);
 
 interface MessagePart {
     text: string;
@@ -21,7 +25,7 @@ interface MessagePart {
 interface ChatMessage {
     role: 'user' | 'model';
     parts: MessagePart[];
-    timestamp?: number;
+    timestamp: number;
 }
 
 const ChatbotFloating: React.FC = () => {
@@ -29,6 +33,7 @@ const ChatbotFloating: React.FC = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
     const { isAuthenticated, isGuest } = useAuth();
 
@@ -39,36 +44,80 @@ const ChatbotFloating: React.FC = () => {
     useEffect(scrollToBottom, [messages]);
 
     useEffect(() => {
-        if (isOpen && messages.length === 0) {
-            setMessages([
-                { role: 'model', parts: [{ text: "Halo! Saya Dompet Juara AI. Ada yang bisa saya bantu terkait keuangan Anda?" }], timestamp: Date.now() }
-            ]);
-        }
-    }, [isOpen]);
+        const fetchInitialGreeting = async () => {
+            if (isOpen && messages.length === 0 && !isLoading) {
+                setIsLoading(true);
+                setError(null);
 
+                const triggerMessageText = "SYSTEM_TRIGGER_GREETING";
+
+                try {
+                    console.log("CLIENT: Triggering initial greeting...");
+                    const response = await axiosInstance.post<ChatMessage>('/ai/chat', {
+                        message: triggerMessageText,
+                        history: [],
+                    });
+
+                    const modelGreetingMessage: ChatMessage = {
+                        ...response.data,
+                        timestamp: response.data.timestamp || Date.now(),
+                    };
+                    setMessages([modelGreetingMessage]);
+                } catch (err: any) {
+                    console.error("CLIENT: Error fetching initial greeting:", err);
+                    const errorMessageText = err.response?.data?.parts?.[0]?.text || err.response?.data?.error || "Gagal memulai percakapan dengan AI.";
+                    setError(errorMessageText);
+                    setMessages([{ role: 'model', parts: [{ text: `Error: ${errorMessageText}` }], timestamp: Date.now() }]);
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        fetchInitialGreeting();
+    }, [isOpen]);
 
     const handleSendMessage = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        if (!input.trim()) return;
+        const trimmedInput = input.trim();
+        if (!trimmedInput || isLoading) return;
 
-        const userMessage: ChatMessage = { role: 'user', parts: [{ text: input }], timestamp: Date.now() };
+        const userMessage: ChatMessage = {
+            role: 'user',
+            parts: [{ text: trimmedInput }],
+            timestamp: Date.now(),
+        };
+
+        const currentMessagesForHistory = [...messages];
+
         setMessages(prev => [...prev, userMessage]);
         setInput('');
         setIsLoading(true);
+        setError(null);
 
         try {
-            const historyForBackend = messages.map(msg => ({ role: msg.role, parts: msg.parts }));
-
-            const response = await axiosInstance.post('/ai/chat', {
+            const payload = {
                 message: userMessage.parts[0].text,
-                history: historyForBackend,
-            });
-            const modelMessage: ChatMessage = { ...response.data, timestamp: Date.now() };
+                history: currentMessagesForHistory.map(msg => ({ role: msg.role, parts: msg.parts })),
+            };
+            console.log("CLIENT: Sending payload:", JSON.stringify(payload, null, 2));
+
+            const response = await axiosInstance.post<ChatMessage>('/ai/chat', payload);
+
+            const modelMessage: ChatMessage = {
+                ...response.data,
+                timestamp: response.data.timestamp || Date.now(),
+            };
             setMessages(prev => [...prev, modelMessage]);
-        } catch (error: any) {
-            console.error("Error sending message:", error);
-            const errorMessageText = error.response?.data?.parts?.[0]?.text || "Maaf, terjadi kesalahan. Coba lagi nanti.";
-            setMessages(prev => [...prev, { role: 'model', parts: [{ text: errorMessageText }], timestamp: Date.now() }]);
+
+        } catch (err: any) {
+            console.error("CLIENT: Error sending message:", err);
+            const errorMessageText = err.response?.data?.parts?.[0]?.text || err.response?.data?.error || "Maaf, terjadi kesalahan. Coba lagi nanti.";
+            setError(errorMessageText);
+
+            setMessages(prev => {
+                return [...prev, { role: 'model', parts: [{ text: `Error: ${errorMessageText}` }], timestamp: Date.now() }];
+            });
         } finally {
             setIsLoading(false);
         }
@@ -82,35 +131,35 @@ const ChatbotFloating: React.FC = () => {
         <>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform duration-300 ease-in-out z-[1000]"
+                className="fixed bottom-6 right-6 bg-blue-600 text-white p-3 sm:p-4 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform duration-300 ease-in-out z-[1000]"
                 aria-label={isOpen ? "Close Chat" : "Open Chat"}
             >
                 {isOpen ? <CloseIcon /> : <ChatIcon />}
             </button>
 
             {isOpen && (
-                <div className="fixed bottom-20 right-6 w-80 h-[28rem] bg-white rounded-lg shadow-xl flex flex-col border border-gray-300 z-[999] transform transition-all duration-300 ease-in-out origin-bottom-right">
+                <div className="fixed bottom-0 right-0 sm:bottom-20 sm:right-6 w-full sm:w-80 md:w-96 h-full sm:h-[calc(100vh-6rem)] max-h-[32rem] bg-white rounded-t-lg sm:rounded-lg shadow-xl flex flex-col border border-gray-300 z-[999] transform transition-all duration-300 ease-in-out origin-bottom-right">
                     <div className="bg-blue-600 text-white p-3 flex justify-between items-center rounded-t-lg">
                         <h3 className="font-semibold text-md">Dompet Juara AI</h3>
-                        <button onClick={() => setIsOpen(false)} className="text-white hover:text-gray-200">
+                        <button onClick={() => setIsOpen(false)} className="text-white hover:text-gray-200" aria-label="Close chat">
                             <CloseIcon />
                         </button>
                     </div>
 
                     <div className="flex-1 p-3 overflow-y-auto space-y-3 bg-gray-50">
                         {messages.map((msg, index) => (
-                            <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div key={`${msg.timestamp}-${index}`} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div
-                                    className={`max-w-[80%] p-2.5 rounded-xl text-sm shadow ${
+                                    className={`max-w-[85%] p-2.5 rounded-xl text-sm shadow-sm ${
                                         msg.role === 'user'
                                             ? 'bg-blue-500 text-white rounded-br-none'
                                             : 'bg-gray-200 text-gray-800 rounded-bl-none'
                                     }`}
                                 >
-                                    {msg.parts[0].text.split('\n').map((line, i) => (
+                                    {msg.parts[0].text.split('\n').map((line, i, arr) => (
                                         <React.Fragment key={i}>
                                             {line}
-                                            {i < msg.parts[0].text.split('\n').length - 1 && <br />}
+                                            {i < arr.length - 1 && <br />}
                                         </React.Fragment>
                                     ))}
                                 </div>
@@ -119,10 +168,15 @@ const ChatbotFloating: React.FC = () => {
                         <div ref={messagesEndRef} />
                         {isLoading && (
                             <div className="flex justify-start">
-                                <div className="max-w-[80%] p-2.5 rounded-xl text-sm shadow bg-gray-200 text-gray-800 rounded-bl-none">
+                                <div className="max-w-[80%] p-2.5 rounded-xl text-sm shadow bg-gray-200 text-gray-800 rounded-bl-none animate-pulse">
                                     <i>Mengetik...</i>
                                 </div>
                             </div>
+                        )}
+                        {error && !isLoading && (
+                             <div className="p-2 mt-2 text-sm text-red-700 bg-red-100 rounded-md">
+                                {error}
+                             </div>
                         )}
                     </div>
 
@@ -137,19 +191,18 @@ const ChatbotFloating: React.FC = () => {
                                 disabled={isLoading}
                                 onKeyPress={(e) => {
                                     if (e.key === 'Enter' && !e.shiftKey) {
-                                        handleSendMessage();
                                         e.preventDefault();
+                                        handleSendMessage();
                                     }
                                 }}
                             />
                             <button
                                 type="submit"
                                 disabled={isLoading || !input.trim()}
-                                className="bg-blue-600 text-white p-2.5 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:bg-gray-300"
+                                className="bg-blue-600 text-white p-2.5 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                aria-label="Send message"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                                    <path d="M3.105 3.105a1.5 1.5 0 012.122-.001l12.12 12.12a1.5 1.5 0 01-2.122 2.122L3.105 5.227a1.5 1.5 0 01-.001-2.122zM3.105 16.895a1.5 1.5 0 01.001-2.122l12.12-12.12a1.5 1.5 0 012.122 2.122L5.227 16.895a1.5 1.5 0 01-2.122.001z" />
-                                </svg>
+                                <SendIcon/>
                             </button>
                         </div>
                     </form>
