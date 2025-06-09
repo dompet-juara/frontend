@@ -6,6 +6,6 @@ export interface AIRecommendation {
 }
 
 export const fetchAIRecommendations = async (): Promise<AIRecommendation> => {
-  const response = await axiosInstance.get('/ai/recommendations');
+  const response = await axiosInstance.get<AIRecommendation>('/ai/recommendations');
   return response.data;
 };

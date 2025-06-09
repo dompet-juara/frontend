@@ -1,96 +1,146 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Outcome, NewOutcomePayload, ExpenseCategory, fetchOutcomes, addOutcome, updateOutcome, deleteOutcome, fetchCategories } from '../api/outcome';
+import {
+    Outcome,
+    NewOutcomePayload,
+    ExpenseCategory,
+    fetchOutcomes,
+    addOutcome,
+    updateOutcome,
+    deleteOutcome,
+    fetchExpenseCategories,
+    PaginatedOutcomeResponse
+} from '../api/outcome';
+import { FetchParams, PaginationInfo } from '../api/income';
+import { useAuth } from '../contexts/AuthContext';
+
+const DEFAULT_LIMIT = 10;
 
 export const useOutcome = () => {
-  const [outcomes, setOutcomes] = useState<Outcome[]>([]);
-  const [categories, setCategories] = useState<ExpenseCategory[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+    const { isGuest } = useAuth();
+    const [outcomes, setOutcomes] = useState<Outcome[]>([]);
+    const [pagination, setPagination] = useState<PaginationInfo | null>(null);
+    const [categories, setCategories] = useState<ExpenseCategory[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-  const loadCategories = useCallback(async () => {
-    try {
-      const data = await fetchCategories();
-      setCategories(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to fetch categories');
-    } finally {
-    }
-  }, []);
-  
-  const loadOutcomes = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchOutcomes();
-      setOutcomes(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to fetch outcomes');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    const [currentParams, setCurrentParams] = useState<FetchParams>(() => {
+        const today = new Date().toISOString().split('T')[0];
+        return { startDate: today, endDate: today, page: 1, limit: DEFAULT_LIMIT };
+    });
 
-  useEffect(() => {
-    loadCategories();
-    loadOutcomes();
-  }, [loadCategories, loadOutcomes]);
+    const loadOutcomes = useCallback(async (params: FetchParams) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response: PaginatedOutcomeResponse = await fetchOutcomes(params);
+            setOutcomes(response.data);
+            setPagination(response.pagination);
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || 'Failed to fetch outcomes');
+            setOutcomes([]);
+            setPagination(null);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
-  const handleAddOutcome = async (payload: NewOutcomePayload) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const newOutcome = await addOutcome(payload);
-      setOutcomes((prev) => [newOutcome, ...prev].sort((a,b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime()));
-      return true;
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to add outcome');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+    const loadCategories = useCallback(async () => {
+        try {
+            const data = await fetchExpenseCategories();
+            setCategories(data);
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || 'Failed to fetch expense categories');
+        }
+    }, []);
 
-  const handleUpdateOutcome = async (id: number, payload: Partial<NewOutcomePayload>) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const updatedOutcome = await updateOutcome(id, payload);
-      setOutcomes((prev) => prev.map((out) => (out.id === id ? updatedOutcome : out))
-                                .sort((a,b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime()));
-      return true;
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to update outcome');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+    useEffect(() => {
+        loadOutcomes(currentParams);
+        loadCategories();
+    }, [currentParams, loadOutcomes, loadCategories]);
 
-  const handleDeleteOutcome = async (id: number) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await deleteOutcome(id);
-      setOutcomes((prev) => prev.filter((out) => out.id !== id));
-      return true;
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to delete outcome');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleAddOutcome = async (payload: NewOutcomePayload) => {
+        if (isGuest) {
+            setError("Guest mode: Cannot add data. Please register or login.");
+            return false;
+        }
+        setLoading(true);
+        setError(null);
+        try {
+            await addOutcome(payload);
+            setCurrentParams((prevParams: FetchParams) => ({ ...prevParams, page: 1 }));
+            return true;
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || 'Failed to add outcome');
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  return {
-    outcomes,
-    categories,
-    loading,
-    error,
-    loadOutcomes,
-    loadCategories,
-    handleAddOutcome,
-    handleUpdateOutcome,
-    handleDeleteOutcome,
-    setError,
-  };
+    const handleUpdateOutcome = async (id: number, payload: Partial<NewOutcomePayload>) => {
+        if (isGuest) {
+            setError("Guest mode: Cannot update data. Please register or login.");
+            return false;
+        }
+        setLoading(true);
+        setError(null);
+        try {
+            await updateOutcome(id, payload);
+            await loadOutcomes(currentParams);
+            return true;
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || 'Failed to update outcome');
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteOutcome = async (id: number) => {
+        if (isGuest) {
+            setError("Guest mode: Cannot delete data. Please register or login.");
+            return false;
+        }
+        setLoading(true);
+        setError(null);
+        try {
+            await deleteOutcome(id);
+            if (outcomes.length === 1 && currentParams.page && currentParams.page > 1) {
+                setCurrentParams((prevParams: FetchParams) => ({ ...prevParams, page: prevParams.page! - 1 }));
+            } else {
+                await loadOutcomes(currentParams);
+            }
+            return true;
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || 'Failed to delete outcome');
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const goToPage = (page: number) => {
+        if (page > 0 && (!pagination || page <= pagination.totalPages)) {
+            setCurrentParams((prevParams: FetchParams) => ({ ...prevParams, page }));
+        }
+    };
+
+    const applyDateFilter = (dateRange: { startDate: string, endDate: string }) => {
+        setCurrentParams((prevParams: FetchParams) => ({ ...prevParams, ...dateRange, page: 1 }));
+    };
+
+    return {
+        outcomes,
+        pagination,
+        categories,
+        loading,
+        error,
+        handleAddOutcome,
+        handleUpdateOutcome,
+        handleDeleteOutcome,
+        setError,
+        goToPage,
+        applyDateFilter,
+        currentFilters: currentParams,
+    };
 };

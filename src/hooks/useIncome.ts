@@ -1,82 +1,151 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Income, NewIncomePayload, fetchIncomes, addIncome, updateIncome, deleteIncome } from '../api/income';
+import {
+    Income,
+    NewIncomePayload,
+    fetchIncomes,
+    addIncome,
+    updateIncome,
+    deleteIncome,
+    fetchIncomeCategories,
+    IncomeCategory,
+    FetchParams,
+    PaginationInfo,
+    PaginatedIncomeResponse
+} from '../api/income';
+import { useAuth } from '../contexts/AuthContext';
+
+const DEFAULT_LIMIT = 10;
 
 export const useIncome = () => {
-  const [incomes, setIncomes] = useState<Income[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+    const { isGuest } = useAuth();
+    const [incomes, setIncomes] = useState<Income[]>([]);
+    const [pagination, setPagination] = useState<PaginationInfo | null>(null);
+    const [categories, setCategories] = useState<IncomeCategory[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-  const loadIncomes = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchIncomes();
-      setIncomes(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to fetch incomes');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    const [currentParams, setCurrentParams] = useState<FetchParams>(() => {
+        const today = new Date().toISOString().split('T')[0];
+        return { startDate: today, endDate: today, page: 1, limit: DEFAULT_LIMIT };
+    });
 
-  useEffect(() => {
-    loadIncomes();
-  }, [loadIncomes]);
+    const loadIncomes = useCallback(async (params: FetchParams) => {
+        setLoading(true);
+        setError(null);
 
-  const handleAddIncome = async (payload: NewIncomePayload) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const newIncome = await addIncome(payload);
-      setIncomes((prev) => [newIncome, ...prev].sort((a,b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime()));
-      return true;
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to add income');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+        try {
+            const response: PaginatedIncomeResponse = await fetchIncomes(params);
+            setIncomes(response.data);
+            setPagination(response.pagination);
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || 'Failed to fetch incomes');
+            setIncomes([]);
+            setPagination(null);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
-  const handleUpdateIncome = async (id: number, payload: Partial<NewIncomePayload>) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const updatedIncome = await updateIncome(id, payload);
-      setIncomes((prev) => prev.map((inc) => (inc.id === id ? updatedIncome : inc))
-                               .sort((a,b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime()));
-      return true;
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to update income');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+    const loadCategories = useCallback(async () => {
+        try {
+            const data = await fetchIncomeCategories();
+            setCategories(data);
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || 'Failed to fetch income categories');
+        }
+    }, []);
 
-  const handleDeleteIncome = async (id: number) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await deleteIncome(id);
-      setIncomes((prev) => prev.filter((inc) => inc.id !== id));
-      return true;
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to delete income');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+    useEffect(() => {
+        loadIncomes(currentParams);
+        loadCategories();
+    }, [loadIncomes, loadCategories, currentParams]);
 
-  return {
-    incomes,
-    loading,
-    error,
-    loadIncomes,
-    handleAddIncome,
-    handleUpdateIncome,
-    handleDeleteIncome,
-    setError,
-  };
+    const handleAddIncome = async (payload: NewIncomePayload) => {
+        if (isGuest) {
+            setError("Guest mode: Cannot add data. Please register or login.");
+            return false;
+        }
+        setLoading(true);
+        setError(null);
+        try {
+            await addIncome(payload);
+            const newParams = { ...currentParams, page: 1 };
+            setCurrentParams(newParams);
+            return true;
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || 'Failed to add income');
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdateIncome = async (id: number, payload: Partial<NewIncomePayload>) => {
+        if (isGuest) {
+            setError("Guest mode: Cannot update data. Please register or login.");
+            return false;
+        }
+        setLoading(true);
+        setError(null);
+        try {
+            await updateIncome(id, payload);
+            await loadIncomes(currentParams);
+            return true;
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || 'Failed to update income');
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteIncome = async (id: number) => {
+        if (isGuest) {
+            setError("Guest mode: Cannot delete data. Please register or login.");
+            return false;
+        }
+        setLoading(true);
+        setError(null);
+        try {
+            await deleteIncome(id);
+            let newParams = { ...currentParams };
+            if (incomes.length === 1 && currentParams.page && currentParams.page > 1) {
+                newParams.page = currentParams.page - 1;
+            }
+            setCurrentParams(newParams);
+            return true;
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || 'Failed to delete income');
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const goToPage = (page: number) => {
+        if (page > 0 && (!pagination || page <= pagination.totalPages)) {
+            const newParams = { ...currentParams, page };
+            setCurrentParams(newParams);
+        }
+    };
+
+    const applyDateFilter = (dateRange: { startDate: string, endDate: string }) => {
+        const newParams = { ...currentParams, ...dateRange, page: 1 };
+        setCurrentParams(newParams);
+    };
+
+    return {
+        incomes,
+        pagination,
+        categories,
+        loading,
+        error,
+        handleAddIncome,
+        handleUpdateIncome,
+        handleDeleteIncome,
+        setError,
+        goToPage,
+        applyDateFilter,
+        currentFilters: currentParams,
+    };
 };

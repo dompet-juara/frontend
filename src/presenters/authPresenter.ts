@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { registerUser, loginUser as apiLoginUser } from '../api/auth';
+import { registerUser, loginUser as apiLoginUser, logoutUser as apiLogoutUser } from '../api/auth';
 import { useAuth } from '../contexts/AuthContext';
 
 export const useAuthPresenter = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { login: contextLogin } = useAuth();
+  const { login: contextLogin, logout: contextLogout, isAuthenticated } = useAuth();
 
   const handleRegister = async ({
     name,
@@ -23,7 +23,7 @@ export const useAuthPresenter = () => {
     try {
       const result = await registerUser({ email, password, name, username });
       console.log('Registration success', result);
-      return true;
+      return true; 
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || 'Registration failed. Please try again.');
       return false;
@@ -44,10 +44,10 @@ export const useAuthPresenter = () => {
     try {
       const result = await apiLoginUser({ identifier, password });
       console.log('Login success data:', result);
-      if (result.token && result.user) {
-        contextLogin(result.token, result.user);
+      if (result.accessToken && result.refreshToken && result.user) {
+        contextLogin(result.accessToken, result.refreshToken, result.user);
       } else {
-        throw new Error("Login response did not include token or user data.");
+        throw new Error("Login response did not include all required token or user data.");
       }
     } catch (err: any) {
       setError(err.response?.data?.error || err.response?.data?.message || err.message || 'Login failed. Please try again.');
@@ -56,9 +56,28 @@ export const useAuthPresenter = () => {
     }
   };
 
+  const handleLogout = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (refreshToken) {
+        await apiLogoutUser(refreshToken);
+      }
+    } catch (err: any) {
+      console.error("API logout failed:", err.response?.data?.message || err.message);
+    } finally {
+      contextLogout();
+      setLoading(false);
+    }
+  };
+
+
   return {
     handleRegister,
     handleLogin,
+    handleLogout,
+    isAuthenticated,
     error,
     loading,
     setError
