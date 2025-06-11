@@ -1,54 +1,67 @@
-# React + TypeScript + Vite
+# Dompet Juara
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Dompet Juara adalah aplikasi manajemen keuangan berbasis web yang dibangun menggunakan React, TypeScript, dan Vite. Aplikasi ini membantu pengguna dalam mencatat pemasukan, pengeluaran, melihat dashboard keuangan, mendapatkan rekomendasi AI, serta fitur chatbot untuk konsultasi keuangan.
 
-Currently, two official plugins are available:
+## Fitur Utama
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Autentikasi**: Login, register, dan mode guest.
+- **Dashboard**: Ringkasan keuangan pengguna.
+- **Pemasukan & Pengeluaran**: Catat dan kelola transaksi keuangan.
+- **AI Recommender**: Rekomendasi keuangan berbasis AI.
+- **Profil Pengguna**: Kelola data pribadi.
+- **Chatbot**: Bantuan dan konsultasi keuangan otomatis.
 
-## Expanding the ESLint configuration
+## Struktur Direktori
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```
+src/
+  App.tsx                // Entry point aplikasi React
+  api/                   // API service untuk komunikasi backend
+  components/            // Komponen UI reusable (Chatbot, Sidebar, dsb)
+  contexts/              // Context API (misal: AuthContext)
+  hooks/                 // Custom React hooks
+  layouts/               // Layout utama aplikasi
+  pages/                 // Halaman utama (Login, Dashboard, Income, Outcome, dsb)
+  presenters/            // Presentational logic (jika ada)
+  utils/                 // Utility functions
+  assets/                // Asset gambar/icon
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Instalasi
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. **Clone repository**
+   ```sh
+   git clone https://github.com/username/dompet-juara-fe.git
+   cd dompet-juara-fe
+   ```
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+2. **Install dependencies**
+   ```sh
+   npm install
+   ```
+
+3. **Jalankan aplikasi**
+   ```sh
+   npm run dev
+   ```
+   Aplikasi akan berjalan di [http://localhost:5173](http://localhost:5173).
+
+## Konfigurasi ESLint
+
+Proyek ini sudah dilengkapi konfigurasi ESLint untuk menjaga kualitas kode. Lihat bagian `README.md` untuk detail ekspansi konfigurasi linting.
+
+## Kontribusi
+
+1. Fork repository ini
+2. Buat branch fitur (`git checkout -b fitur-anda`)
+3. Commit perubahan (`git commit -am 'Tambah fitur'`)
+4. Push ke branch (`git push origin fitur-anda`)
+5. Buat Pull Request
+
+## Lisensi
+
+MIT License
+
+---
+
+> Dompet Juara - Manajemen keuangan cerdas untuk semua.
