@@ -22,7 +22,7 @@ src/
   hooks/                 // Custom React hooks
   layouts/               // Layout utama aplikasi
   pages/                 // Halaman utama (Login, Dashboard, Income, Outcome, dsb)
-  presenters/            // Presentational logic (jika ada)
+  presenters/            // Presentational logic
   utils/                 // Utility functions
   assets/                // Asset gambar/icon
 ```
