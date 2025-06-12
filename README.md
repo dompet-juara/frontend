@@ -1,5 +1,3 @@
----
-
 # Dompet Juara - Frontend Aplikasi Manajemen Keuangan 🏆💸
 
 [![Framework](https://img.shields.io/badge/Framework-React-61DAFB.svg?logo=react&logoColor=white)](https://reactjs.org/)
@@ -102,13 +100,12 @@ frontend-main/
 
 1.  **Clone repository:**
     ```bash
-    git clone https://github.com/tim-dompet-juara/dompet-juara-fe.git
+    git clone https://github.com/dompet-juara/frontend.git
     ```
-    *(Ganti URL dengan URL repository Anda yang sebenarnya)*
 
 2.  **Masuk ke direktori proyek:**
     ```bash
-    cd dompet-juara-fe
+    cd frontend
     ```
 
 3.  **Install dependensi:**
@@ -185,7 +182,7 @@ Proyek ini dilisensikan di bawah [**Lisensi MIT**](LICENSE). Lihat file `LICENSE
 ## 📧 Kontak / Penulis
 
 *   **Tim Proyek**: Dompet Juara
-*   **Organisasi GitHub**: [https://github.com/tim-dompet-juara](https://github.com/tim-dompet-juara)
-*   **Email**: kontak@dompetjuara.com
+*   **Organisasi GitHub**: [https://github.com/dompet-juara](https://github.com/dompet-juara)
+*   **Email**: juaradompet@gmail.com
 
 ---
