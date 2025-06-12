@@ -1,5 +1,3 @@
-Tentu, ini dia README.md untuk proyek frontend "Dompet Juara" dengan format yang Anda minta:
-
 ---
 
 # Dompet Juara - Frontend Aplikasi Manajemen Keuangan 🏆💸
@@ -187,7 +185,7 @@ Proyek ini dilisensikan di bawah [**Lisensi MIT**](LICENSE). Lihat file `LICENSE
 ## 📧 Kontak / Penulis
 
 *   **Tim Proyek**: Dompet Juara
-*   **Organisasi GitHub**: [https://github.com/tim-dompet-juara](https://github.com/tim-dompet-juara) (contoh)
-*   **Email**: kontak@dompetjuara.com (contoh)
+*   **Organisasi GitHub**: [https://github.com/tim-dompet-juara](https://github.com/tim-dompet-juara)
+*   **Email**: kontak@dompetjuara.com
 
 ---
